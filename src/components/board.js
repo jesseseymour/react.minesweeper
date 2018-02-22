@@ -5,12 +5,14 @@ export default class Board extends Component {
   constructor(props){
     super(props)
     this.state = {
-
+      bombs: []
     }
   }
 
   componentWillMount(){
-    this.generateBombs()
+    this.setState({
+      bombs: this.generateBombs()
+    })
   }
 
   generateBombs(){
@@ -19,7 +21,7 @@ export default class Board extends Component {
       let rand = this.getRandomSquare()
       bombs.includes(rand) ? i-- : bombs.push(rand)
     }
-    console.log(bombs)
+    return bombs
   }
 
   getRandomSquare(){
