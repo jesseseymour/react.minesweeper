@@ -1,0 +1,17 @@
+$size: 400px;
+body,html{
+  padding: 0;
+  margin: 0;
+  text-align: center;
+}
+button{
+  width: 20px;
+  height: 20px;
+}
+.board{
+  display: flex;
+  flex-flow: row wrap;
+  &.level-1{
+    width: (20px * 8);
+  }
+}

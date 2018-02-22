@@ -1,9 +1,11 @@
 import { Component } from 'react'
+import Board from './components/board'
 
 class App extends Component {
   render() {
     return(
-      <div>This is my app</div>
+      <Board level="1"
+             numSquares="64" />
     )
   }
 }
