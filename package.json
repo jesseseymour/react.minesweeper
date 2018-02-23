@@ -1,8 +1,9 @@
 {
-  "name": "ReactTemplate",
+  "name": "ReactMinesweeper",
   "version": "1.0.0",
-  "description": "React Template",
+  "description": "Minesweeper made with React",
   "main": "index.js",
+  "repository": "github:jesseseymour/react.minesweeper",
   "scripts": {
     "start": "node_modules/.bin/webpack-dev-server"
   },
