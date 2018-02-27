@@ -4,24 +4,117 @@ import Square from './square'
 export default class Board extends Component {
   constructor(props){
     super(props)
+    this.rowLength = 8
     this.state = {
-      squares: Array(parseInt(props.numSquares)).fill().map(() => ({'disabled':false,'isFlagged':false})),
-      bombs: this.generateBombs(),
+      squares: Array(parseInt(props.numSquares))
+                .fill()
+                .map(
+                  (x,i) => (
+                    {
+                      'disabled':false,
+                      'isFlagged':false,
+                      'isBomb':false,
+                      'nearBombs':null,
+                      'adjacent':null,
+                      'position':this.getPosition(i)
+                    }
+                  )
+                ),
+      isWinner: false,
+      isLoser: false,
       firstMove: true
     }
   }
 
-  componentWillMount(){
-    
+  getPosition = i => {
+    let arr = [], numSquares = parseInt(this.props.numSquares), numColumns = parseInt(this.props.numColumns)
+    if(i < this.rowLength){
+      arr.push('top')
+    }
+    if(i >= numSquares - this.rowLength){
+      arr.push('bottom')
+    }
+    if(i % numColumns === 0){
+      arr.push('left')
+    }
+    if (i % numColumns === numColumns - 1) {
+      arr.push('right')
+    }
+    return arr
   }
 
-  generateBombs(){
-    const bombs = []
+  
+
+  componentWillMount(){
+    switch(parseInt(this.props.level)){
+      case 1:
+        this.rowLength = 8
+        break
+      default:
+        this.rowLength = 8
+        break
+    }
+
+    //this.promiseTest()
+    //console.log(myPromise)
+    new Promise((resolve,reject) => {
+                  resolve(this.state.squares)
+                })
+                .then(squares => this.generateBombs(squares))
+                .then(squares => this.setAdjacents(squares))
+                .then(squares => this.setState({squares}))
+    console.log("state set")
+    // this.setState({
+    //   squares: this.generateBombs()
+    // })
+  }
+  
+
+  setAdjacents = squares => {
+    squares.map((x,i) => {
+      if(x.position.includes('top') && x.position.includes('left')){
+        //x.adjacent = Array(3).fill
+      }
+    })
+    // let square, arr = []
+    // for (let j = 0; j < 8; j++){
+    //   switch(j){
+    //     case 0:
+    //       square = i - this.rowLength - 1
+    //       break
+    //     case 1:
+    //       square = i - this.rowLength
+    //       break
+    //     case 2:
+    //       square = i - this.rowLength + 1
+    //       break
+    //     case 3:
+    //       square = i - 1
+    //       break
+    //     case 4:
+    //       square = i + 1
+    //       break
+    //     case 5:
+    //       square = i + this.rowLength - 1
+    //       break
+    //     case 6:
+    //       square = i + this.rowLength
+    //       break
+    //     case 7:
+    //       square = i + this.rowLength + 1
+    //       break
+    //   }
+    //   arr.push(square)
+    // }
+    return squares
+  }
+
+  generateBombs(squares){
     for(let i = 0; i < this.getNumBombs(); i++ ){
       let rand = this.getRandomSquare()
-      bombs.includes(rand) ? i-- : bombs.push(rand)
+      squares[rand].isBomb ? i-- : squares[rand].isBomb = true
     }
-    return bombs
+    return squares
   }
 
   getRandomSquare(){
@@ -38,27 +131,51 @@ export default class Board extends Component {
   }
 
   checkForBomb = i => {
-    return this.state.bombs.includes(i) ? true : false
+    const isBomb = this.state.squares[i].isBomb
+    if (isBomb && this.state.firstMove) {
+      this.moveBomb(i)
+      return false
+    }
 
-    // if (isBomb && this.state.firstMove){
-    //   this.moveBomb(i)
-    // }
-
+    this.setState({firstMove: false})
+    return isBomb
   }
 
-  moveBomb = i => {
-
-    //gotta find the bomb and remove from array, then search for the next available space
-    let tempbombs = this.state.bombs
-    if(i < this.state.squares.length){
-      //tempbombs
+  moveBomb = (i,orig) => {
+    let squares = this.state.squares
+    const _orig = typeof orig !== 'undefined' ? orig : i
+    const j = i < squares.length - 1 ? i + 1 : 0
+    if (!squares[j].isBomb){
+      squares[j].isBomb = true
+      squares[_orig].isBomb = false
+      this.setState({squares:squares,firstMove:false})
+    } else {
+      this.moveBomb(j,_orig)
     }
   }
 
-  handleLeftClick = (i) => {
-    if(this.checkForBomb(i) && this.state.firstMove) this.moveBomb(i)
+  //first col: index % numCol === 0
+  //last col:  index % numCol === numCol - 1
+  //first row: index < this.rowLength
+  //last row:  index >= parseInt(this.props.numSquares) - this.rowLength
 
-    if(this.state.squares[i].isFlagged) return
+  handleLeftClick = (i) => {
+    //console.log(i)
+    //return
+
+    if(this.state.squares[i].isFlagged){
+      return
+    }
+    else if(this.checkForBomb(i) && this.state.firstMove) {
+      this.moveBomb(i)
+    }
+    else if(this.checkForBomb(i)){
+      this.setState({isLoser: true})
+      return
+    }
+    
+
+    
     let tempsquares = this.state.squares
     tempsquares[i].disabled = true
 
@@ -82,13 +199,15 @@ export default class Board extends Component {
     for(let i = 0; i < this.props.numSquares; i++){
       squares.push(
         <Square key={i}
-                isBomb={this.state.bombs.includes(i)}
+                isBomb={this.state.squares[i].isBomb}
                 isFlagged={this.state.squares[i].isFlagged}
                 onClick={() => this.handleLeftClick(i)}
                 onRightClick={(e) => this.handleRightClick(e,i)}
                 disabled={this.state.squares[i].disabled}
+                id={i}
          />)
     }
+    if(this.state.isLoser) alert("YOU ARE A LOSER :(")
     return (
       <div className={"board level-" + this.props.level}>
         {squares}

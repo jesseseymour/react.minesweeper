@@ -5,7 +5,9 @@ class App extends Component {
   render() {
     return(
       <Board level="1"
-             numSquares="64" />
+             numSquares="64"
+             numColumns="8"
+             numRows="8" />
     )
   }
 }

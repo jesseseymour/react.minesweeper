@@ -13,6 +13,7 @@ body{
 button{
   width: 20px;
   height: 20px;
+  padding: 0;
   &.bomb{
     background-color: red;
   }
